@@ -1,0 +1,16 @@
+
+=== STEP LIMIT EVIDENCE ===
+Step limit reached: maximum 3 stages allowed
+
+=== TOKEN BUDGET EVIDENCE ===
+Token budget rejected: estimated 250 tokens exceeds limit of 100
+
+=== VALIDATION EVIDENCE ===
+Validation failed: outline produced empty output
+Invalid output quarantined and not passed to next stage
+
+=== RETRY EVIDENCE ===
+Retry attempt 1
+Retry attempt 2
+Retry attempt 3
+Call succeeded

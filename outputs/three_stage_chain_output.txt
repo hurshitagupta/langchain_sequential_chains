@@ -1,0 +1,24 @@
+Completed 3/3 allowed stages
+
+=== OUTLINE ===
+- **Define the token budget** – Set a clear limit on the total number of tokens (input + output) an agent can consume per interaction or per session, based on model pricing, latency constraints, and downstream processing capacity.  
+
+- **Prioritize essential context** – Allocate the majority of tokens to high‑value information (task instructions, critical user data, domain‑specific knowledge) and trim or summarize low‑impact background text.  
+
+- **Implement dynamic budgeting** – Use runtime checks to monitor token usage, adjust prompt length on‑the‑fly (e.g., truncate history, switch to concise summaries), and fallback to a “short‑response” mode when the budget is near exhaustion.  
+
+- **Leverage token‑efficient techniques** – Employ strategies such as few‑shot prompting with reusable templates, token‑compression (e.g., embeddings, hash IDs), and model‑specific token‑reduction tricks (e.g., using `\n` instead of spaces, avoiding redundant punctuation).  
+
+- **Audit and iterate** – Log token consumption per request, analyze patterns (over‑budget spikes, under‑utilized capacity), and refine the budgeting policy, prompt design, and data preprocessing to continuously optimize cost‑performance
+
+=== DRAFT ===
+**Token budgeting for AI agents**  
+
+First, define a hard token budget that caps the combined input + output tokens per interaction or session. The limit should reflect model pricing, latency targets, and downstream processing capacity, giving you a clear cost‑performance ceiling. Next, prioritize essential context: devote the bulk of the budget to high‑value elements such as task instructions, critical user data, and domain‑specific knowledge, while trimming or summarising low‑impact background text. Implement dynamic budgeting at runtime—monitor token usage, automatically truncate history or replace it with concise summaries, and switch to a “short‑response” mode when the budget approaches its limit. Leverage token‑efficient techniques: reuse few‑shot templates, compress repetitive data with embeddings or hash IDs, and apply model‑specific tricks (e.g., `\n` instead of spaces, minimal punctuation). Finally, audit every request: log token consumption, spot over‑budget spikes or under‑utilised capacity, and iteratively refine the budgeting policy, prompt design, and preprocessing pipeline. This feedback loop continuously optimises cost while preserving response quality.
+
+=== CRITIQUE ===
+**Three concrete ways to tighten and strengthen the draft**
+
+| # | Improvement | Why it helps | How to apply it |
+|---|--------------|--------------|-----------------|
+| **1. Add a clear, numbered workflow** | Readers can instantly see *what* to do, *when* to do it, and *why* each step matters. A step‑by‑step outline also makes the text scannable for busy engineers. | Insert a “3‑step token‑budgeting loop” (or a 4‑step version) after the opening paragraph, and reference each step in the later sentences. | ```markdown\n**Token‑budgeting workflow**\n1️⃣ **Set the hard budget** – define a max‑tokens value per request/session (e.g., 2 k tokens for GPT‑4‑Turbo).  \n2️⃣ **Allocate budget slices** – reserve tokens for instruction, user context, domain knowledge, and response.  \n3️⃣ **Enforce & adapt at runtime** – monitor usage, truncate/summary history, and fall back to short‑response mode when the remaining budget falls below a threshold.  \n4️⃣ **

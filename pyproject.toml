@@ -1,0 +1,12 @@
+[project]
+name = "langchain-sequential-chains"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dotenv>=0.9.9",
+    "langchain>=1.4.0",
+    "langchain-openrouter>=0.2.8",
+    "pytest>=9.1.1",
+]

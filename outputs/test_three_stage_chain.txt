@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Hurshita Gupta\OneDrive\Desktop\langchain_sequential_chains\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Hurshita Gupta\OneDrive\Desktop\langchain_sequential_chains
+configfile: pyproject.toml
+plugins: anyio-4.15.1, langsmith-0.12.4
+collecting ... collected 3 items
+
+tests/test_three_stage_chain.py::test_three_stage_chain_success PASSED   [ 33%]
+tests/test_three_stage_chain.py::test_three_stage_chain_empty_topic PASSED [ 66%]
+tests/test_three_stage_chain.py::test_three_stage_chain_invalid_output PASSED [100%]
+
+============================== 3 passed in 1.05s ==============================
