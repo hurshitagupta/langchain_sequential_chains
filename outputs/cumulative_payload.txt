@@ -1,0 +1,38 @@
+Completed 3/3 allowed stages
+
+=== CUMULATIVE PAYLOAD ===
+
+TOPIC:
+token budgeting for AI agents
+
+OUTLINE:
+- **Define the token budget** – Set a clear limit on the total number of tokens (input + output) an AI agent can consume per interaction or per time window (e.g., per request, per session, per day).  
+
+- **Prioritize high‑impact content** – Allocate the bulk of the budget to essential prompts, critical context, and desired outputs; trim or compress less‑important background information and auxiliary instructions.  
+
+- **Use token‑efficient prompting techniques** – Employ concise phrasing, reusable system messages, token‑compression tools (e.g., summarization, embeddings), and structured data formats (JSON, tables) to convey the same meaning with fewer tokens.  
+
+- **Monitor and enforce usage in real time** – Implement logging, alerts, and hard caps that track token consumption per request and automatically truncate or reject prompts that would exceed the budget.  
+
+- **Iteratively optimize and adapt** – Analyze usage patterns, identify wasteful token spikes, and adjust the budget, prompt templates, or model
+
+DRAFT:
+**Token Budgeting for AI Agents – A Quick Guide**
+
+1. **Define the token budget** – Establish a hard limit on the total tokens (input + output) an agent may use per interaction, per session, or per day. This ceiling protects costs, ensures consistent latency, and prevents runaway prompts.
+
+2. **Prioritize high‑impact content** – Reserve the majority of the budget for essential instructions, critical context, and the desired answer. Trim or compress peripheral background, optional examples, and decorative language that do not affect the core task.
+
+3. **Use token‑efficient prompting techniques** – Write concise prompts, reuse a single system message across calls, and employ compression tools such as summarizers or embeddings. Favor structured formats (JSON, tables, bullet lists) that convey the same information with fewer tokens than free‑form text.
+
+4. **Monitor and enforce usage in real time** – Log token counts per request, set alerts for approaching limits, and enforce hard caps that automatically truncate or reject prompts that would exceed the budget.
+
+5. **Iteratively optimize and adapt** – Regularly review usage patterns, pinpoint spikes, and refine budgets, templates, or model choices. Continuous tuning keeps the agent performant while staying within token constraints.
+
+CRITIQUE:
+**Three concrete ways to tighten up the guide**
+
+| # | Improvement | Why it helps | How to implement it |
+|---|--------------|--------------|----------------------|
+| 1 | **Add concrete, “before‑and‑after” examples** | Readers can instantly see the token savings you’re talking about, which turns abstract advice into actionable technique. | Insert a short box after point 3, e.g.:<br>**Before:** “Please provide a detailed, step‑by‑step explanation of how to calculate the net present value of a project, including all assumptions, formulas, and a worked example.” (≈ 38 tokens)<br>**After:** “Calculate NPV; give formula, assumptions, and one example.” (≈ 12 tokens). Show the token count and cost difference. |
+| 2 | **Clarify the scope of “budget” with a quick cost model** | “Hard limit” is vague; teams need a concrete way to decide *how many* tokens are acceptable for a given use‑case. | Add a sub‑point under #1 that walks through a simple calculation: <br>  `budget = (max cost per interaction

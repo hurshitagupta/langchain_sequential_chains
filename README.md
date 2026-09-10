@@ -103,3 +103,148 @@ uv run python guardrail_evidence.py > outputs/guardrail_evidence.txt
 ## Task 1 Result
 
 Task 1 demonstrates a working three-stage sequential chain where the outline, draft, and critique are implemented as separate Runnables. Each stage executes in sequence, model output is validated before being used or returned, and the implementation includes shared controls for step limits, retries, timeouts, token budgeting, validation, and secret hygiene.
+
+---
+
+## Task 2 — Cumulative Payload
+
+Task 2 extends the three-stage sequential chain by carrying the original input and all intermediate outputs forward in a single cumulative dictionary.
+
+The state grows as the pipeline executes:
+
+```text id="k7d4uq"
+{"topic"}
+     ↓
+{"topic", "outline"}
+     ↓
+{"topic", "outline", "draft"}
+     ↓
+{"topic", "outline", "draft", "critique"}
+```
+
+### Implementation
+
+The pipeline begins with:
+
+```python id="h5edq5"
+state = {
+    "topic": topic
+}
+```
+
+Each stage receives the same cumulative state and adds its own result:
+
+```python id="dnclj2"
+state["outline"] = outline_chain.invoke(state)
+
+state["draft"] = draft_chain.invoke(state)
+
+state["critique"] = critique_chain.invoke(state)
+```
+
+This ensures that later stages have access to both the original input and all previously generated values.
+
+The execution state is created locally inside `run_chain()` rather than stored in a global variable. Each pipeline execution therefore maintains its own independent state.
+
+### Cumulative State
+
+During execution, the payload progresses through the following stages:
+
+**Initial state**
+
+```python id="tdh1gw"
+{
+    "topic": "AI agents"
+}
+```
+
+**After outline**
+
+```python id="czsw7u"
+{
+    "topic": "AI agents",
+    "outline": "..."
+}
+```
+
+**After draft**
+
+```python id="bdh61r"
+{
+    "topic": "AI agents",
+    "outline": "...",
+    "draft": "..."
+}
+```
+
+**Final state**
+
+```python id="b82jq9"
+{
+    "topic": "AI agents",
+    "outline": "...",
+    "draft": "...",
+    "critique": "..."
+}
+```
+
+The final state dictionary is returned directly by the pipeline.
+
+### Testing
+
+Task 2 includes automated tests for both successful and invalid execution.
+
+The success test verifies that the final returned dictionary contains the original topic along with all three intermediate outputs:
+
+```text
+topic
+outline
+draft
+critique
+```
+
+The failure test verifies that an empty topic is rejected before pipeline execution.
+
+Fake Runnables are used during testing so the tests remain deterministic and do not require external API calls.
+
+### Guardrails
+
+Task 2 reuses the shared project guardrails implemented in `guardrails.py`, including:
+
+* Step limit
+* Capped retries
+* Per-call timeout
+* Input token budget
+* Input and output validation
+* Environment-variable based secret handling
+
+The shared `guardrail_evidence.py` and saved guardrail output provide project-level evidence for the implemented controls.
+
+### Run Task 2
+
+```bash id="0il6y8"
+uv run python -m cumulative_payload.cumulative_payload
+```
+
+### Run Task 2 Tests
+
+```bash id="ldxpt8"
+uv run pytest tests/test_cumulative_payload.py -v
+```
+
+### Save Task 2 Output
+
+```bash id="g8fcjy"
+uv run python -m cumulative_payload.cumulative_payload > outputs/cumulative_payload.txt
+```
+
+### Save Test Output
+
+```bash id="kh6y9b"
+uv run pytest tests/test_cumulative_payload.py -v > outputs/test_cumulative_payload.txt
+```
+
+## Task 2 Result
+
+Task 2 demonstrates explicit cumulative state management across a sequential pipeline. The original topic and every intermediate result are retained in one dictionary and passed forward to subsequent stages without relying on hidden global state.
+
