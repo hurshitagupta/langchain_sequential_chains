@@ -349,3 +349,171 @@ uv run pytest tests/test_inter_stage_validation.py -v > outputs/test_inter_stage
 ## Task 3 Result
 
 Task 3 demonstrates inter-stage validation in the sequential pipeline. Every generated result is checked before it can become input to the following stage, preventing invalid intermediate output from propagating through the chain.
+
+---
+
+## Task 4 — Resumability
+
+Task 4 extends the sequential pipeline by persisting successfully completed stage results. If execution fails at a later stage, the saved state can be loaded and the pipeline can continue without rerunning stages that have already completed successfully.
+
+### Implementation
+
+Pipeline state is persisted in a JSON file:
+
+```text id="vmrh77"
+state.json
+```
+
+Two functions handle persistence:
+
+```python id="0azny8"
+save_state(state)
+load_state(topic)
+```
+
+After each stage completes and passes validation, the cumulative state is saved:
+
+```text id="i0hl7q"
+Outline
+   ↓
+Validate
+   ↓
+Save state
+
+Draft
+   ↓
+Validate
+   ↓
+Save state
+
+Critique
+   ↓
+Validate
+   ↓
+Save state
+```
+
+Saving occurs **after validation**, ensuring that invalid stage output is not treated as a successful checkpoint.
+
+### Resume Behaviour
+
+When the pipeline starts, it checks for previously saved state:
+
+```python id="zjdtpw"
+state = load_state(topic)
+```
+
+Before executing each stage, the pipeline checks whether that stage already exists in the saved state.
+
+For example:
+
+```python id="gk03wi"
+if "outline" in state:
+    print("Skipping outline - already completed")
+```
+
+The same mechanism is used for the draft and critique stages.
+
+Conceptually, a failed execution can therefore behave as:
+
+```text id="78sr13"
+First execution:
+
+Topic
+  ↓
+Outline ✓
+  ↓
+Validate ✓
+  ↓
+Save
+  ↓
+Draft ✗
+  ↓
+STOP
+```
+
+The saved state still contains the successfully generated outline.
+
+On the next execution:
+
+```text id="sqzkt6"
+Load saved state
+      ↓
+Outline already exists → Skip
+      ↓
+Draft → Continue
+      ↓
+Critique → Continue
+```
+
+This allows recovery to resume from the last successfully completed stage rather than restarting the complete pipeline.
+
+### Topic Safety
+
+Saved state is reused only when its topic matches the requested topic:
+
+```python id="uh4bc8"
+if state.get("topic") == topic:
+```
+
+If the topic is different, a new state is created. This prevents intermediate results from an unrelated previous pipeline run from being reused.
+
+### Testing
+
+Task 4 includes automated tests for successful execution and failure recovery.
+
+The success test verifies that:
+
+* Outline, draft, and critique are generated.
+* The final cumulative state contains all stage results.
+* The state file is successfully persisted.
+
+The resumability failure test simulates a draft-stage failure after the outline has completed.
+
+The test then invokes the pipeline again with the saved state and verifies that the previously completed outline is not executed again. The draft and critique stages continue from the saved checkpoint.
+
+A `ShouldNotRun` fake is used for the outline during the resumed execution. If the pipeline incorrectly attempts to regenerate the completed outline, the test fails.
+
+This provides automated evidence that recovery **resumes rather than restarts**.
+
+### Guardrails
+
+Task 4 continues to use the shared project guardrails:
+
+* Step limit for newly executed stages
+* Capped Runnable retries
+* Per-call model timeout
+* Input token budget
+* Input validation
+* Inter-stage output validation
+* Environment-variable based secret handling
+
+Only successfully validated stage results are persisted.
+
+### Run Task 4
+
+```bash id="45ggby"
+uv run python -m resumability.resumability
+```
+
+### Run Task 4 Tests
+
+```bash id="b5zuxz"
+uv run pytest tests/test_resumability.py -v
+```
+
+### Save Task 4 Output
+
+```bash id="ihdq8g"
+uv run python -m resumability.resumability > outputs/resumability.txt
+```
+
+### Save Test Output
+
+```bash id="x8c4ny"
+uv run pytest tests/test_resumability.py -v > outputs/test_resumability.txt
+```
+
+## Task 4 Result
+
+Task 4 implements resumability using persisted cumulative state. Each successfully validated stage is saved immediately, and previously completed stages are skipped when matching state is loaded. The automated failure test demonstrates that execution can continue from the last successful stage instead of restarting the complete sequential pipeline.
