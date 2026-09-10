@@ -1,0 +1,53 @@
+Outline validation passed
+Draft validation passed
+Critique validation passed
+
+Completed 3/3 allowed stages
+
+=== FINAL VALIDATED STATE ===
+
+TOPIC:
+token budgeting for AI agents
+
+OUTLINE:
+**Token‑Budgeting Cheat Sheet for AI Agents**
+
+- **Define the budget up‑front**  
+  - Set a hard limit (e.g., 4 K, 8 K, 32 K tokens) based on model pricing, latency constraints, and downstream costs.  
+  - Split the budget into *input* (prompt, context, system messages) vs. *output* (generated response) allowances.
+
+- **Prioritize and prune context**  
+  - Keep only the most recent, relevant conversation turns or the highest‑impact knowledge snippets.  
+  - Use summarization, vector‑search, or “sliding‑window” techniques to compress older history while preserving essential facts.
+
+- **Allocate tokens per component**  
+  - **System prompt**: 5–10 % of total budget (static, reusable).  
+  - **User query**: 10–15 % (usually short).  
+  - **Tool calls / function signatures**: reserve a fixed slice (e.g., 5 %).  
+  - **Response**: remaining budget, with a safety margin (≈5 %) for unexpected token overruns.
+
+- **Implement runtime guards**  
+  - Pre‑flight check: count tokens before sending the request
+
+DRAFT:
+**Token‑Budgeting Cheat Sheet for AI Agents**
+
+Start by **defining the budget up‑front**: pick a hard ceiling that matches your model’s pricing and latency goals (e.g., 4 K, 8 K, or 32 K tokens). Split this limit into *input* (system prompt, user query, tool signatures, retrieved context) and *output* (the model’s reply) portions.
+
+Next, **prioritize and prune context**. Keep only the most recent, relevant turns or the highest‑impact knowledge snippets. Use summarization, vector‑search, or a sliding‑window to compress older history while preserving essential facts.
+
+**Allocate tokens per component**:  
+- **System prompt** – 5‑10 % of the total (static, reusable).  
+- **User query** – 10‑15 % (usually short).  
+- **Tool calls / function signatures** – reserve ~5 %.  
+- **Response** – the remaining budget, leaving a 5 % safety margin for unexpected overruns.
+
+Finally, **implement runtime guards**: run a pre‑flight token count before each request and truncate or re‑summarize if the sum exceeds the budget. This disciplined approach
+
+CRITIQUE:
+**Three concrete ways to tighten up the cheat‑sheet**
+
+| # | What to change | Why it helps | How to do it (example) |
+|---|----------------|--------------|------------------------|
+| 1️⃣ | **Add a concrete “budget‑by‑component” table with real‑world numbers** | Readers can instantly see what a 4 K‑token budget looks like in practice, rather than having to do the math themselves. | ```text\n| Component                | % of 4 K | Tokens (≈) |\n|--------------------------|----------|-----------|\n| System prompt            | 5 %      | 200       |\n| User query               | 12 %     | 480       |\n| Tool/function signatures | 5 %      | 200       |\n| Model response (target)  | 73 %     | 2 920      |\n| Safety margin            | 5 %      | 200       |\n```<br>Adjust the numbers for 8 K / 32 K budgets in a footnote. |
+| 2️⃣ | **Introduce a “dynamic‑budget

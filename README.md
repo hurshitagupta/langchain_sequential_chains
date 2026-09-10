@@ -248,3 +248,104 @@ uv run pytest tests/test_cumulative_payload.py -v > outputs/test_cumulative_payl
 
 Task 2 demonstrates explicit cumulative state management across a sequential pipeline. The original topic and every intermediate result are retained in one dictionary and passed forward to subsequent stages without relying on hidden global state.
 
+---
+
+## Task 3 — Inter-Stage Validation
+
+Task 3 extends the cumulative sequential pipeline by adding a validation gate between each stage.
+
+The pipeline now follows:
+
+```text
+Outline → Validate → Draft → Validate → Critique → Validate
+```
+
+A stage must produce valid output before the following stage is allowed to execute.
+
+### Implementation
+
+A stage-level validation function is used to check every generated result:
+
+```python
+def validate_stage(stage: str, output: str) -> None:
+    validate_output(stage, output)
+
+    if len(output.strip()) < 10:
+        raise ValueError(
+            f"Validation failed: {stage} output is too short"
+        )
+
+    print(f"{stage.capitalize()} validation passed")
+```
+
+The shared `validate_output()` guardrail first rejects empty output. The additional stage validation rejects output that is too short to be considered usable.
+
+Validation occurs immediately after every model call and before the following Runnable executes.
+
+For example:
+
+```text
+Outline generated
+      ↓
+Outline validated
+      ↓
+Draft generated
+      ↓
+Draft validated
+      ↓
+Critique generated
+      ↓
+Critique validated
+```
+
+If validation fails at any point, an exception stops the pipeline and the next stage is not executed.
+
+### Testing
+
+Task 3 includes a success case where all three stages return valid output and complete successfully.
+
+The failure case deliberately makes the outline return an invalid short value. The draft stage is replaced with a `ShouldNotRun` fake that raises an assertion if it is called.
+
+This verifies that an invalid outline stops execution before the draft stage rather than allowing invalid intermediate data to continue through the pipeline.
+
+### Evidence
+
+A successful execution produced:
+
+```text
+Outline validation passed
+Draft validation passed
+Critique validation passed
+
+Completed 3/3 allowed stages
+```
+
+This demonstrates that each generated stage result was validated before execution continued.
+
+### Run Task 3
+
+```bash
+uv run python -m inter_stage_validation.inter_stage_validation
+```
+
+### Run Task 3 Tests
+
+```bash
+uv run pytest tests/test_inter_stage_validation.py -v
+```
+
+### Save Task 3 Output
+
+```bash
+uv run python -m inter_stage_validation.inter_stage_validation > outputs/inter_stage_validation.txt
+```
+
+### Save Test Output
+
+```bash
+uv run pytest tests/test_inter_stage_validation.py -v > outputs/test_inter_stage_validation.txt
+```
+
+## Task 3 Result
+
+Task 3 demonstrates inter-stage validation in the sequential pipeline. Every generated result is checked before it can become input to the following stage, preventing invalid intermediate output from propagating through the chain.
