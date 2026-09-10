@@ -1,0 +1,58 @@
+
+Completed 3/3 allowed stages
+
+=== COST REPORT ===
+Stage            Input    Output     Total    Latency(s)
+--------------------------------------------------------
+Outline             81       399       480          5.01
+Draft              427       342       769          7.17
+Critique           385       500       885          4.19
+--------------------------------------------------------
+TOTAL              893      1241      2134         16.37
+
+=== FINAL OUTPUT ===
+
+OUTLINE:
+**Token‑Budgeting Cheat Sheet for AI Agents**
+
+- **Define the budget up front**  
+  - Set a hard limit (e.g., 4 K, 8 K, 32 K tokens) based on model capacity, cost constraints, and latency requirements.  
+  - Split the budget into *input* (prompt, context, retrieval) vs. *output* (generated response) allowances.
+
+- **Prioritize and prune context**  
+  - Use relevance scoring, recency, or semantic similarity to keep only the most useful documents/chunks.  
+  - Apply summarization, chunking, or vector‑based retrieval to compress large knowledge bases into a few high‑value tokens.
+
+- **Structure prompts for efficiency**  
+  - Adopt a “system‑instruction + few‑shot examples + user query” template that reuses static system messages across calls.  
+  - Cache reusable system prompts and embed them in the agent’s code to avoid re‑sending them each time.
+
+- **Implement dynamic budget checks**  
+  - Before each generation, compute `remaining = max_budget – tokens_used_so_far`.  
+  - If `remaining` falls below a safety threshold, trigger fallback actions: truncate context, request clarification, or switch to a cheaper model.
+
+- **Monitor, log, and iterate**  
+  - Record token counts per request (input vs. output) and associated cost/latency.  
+  - Use analytics to spot patterns (e.g., over‑long histories) and refine pruning, summarization, or prompt‑reuse strategies.  
+  - Periodically re‑evaluate the budget limits as model pricing or usage patterns evolve.
+
+DRAFT:
+**Token‑Budgeting Cheat Sheet for AI Agents**
+
+Start by **defining the budget up front**—pick a hard ceiling (e.g., 4 K, 8 K, 32 K tokens) that reflects the model’s context window, cost limits, and latency goals. Split this ceiling into *input* (prompt, retrieved context) and *output* (generated answer) allowances.
+
+Next, **prioritize and prune context**. Rank documents or chunks by relevance, recency, or semantic similarity, then keep only the top‑scoring items. Use summarization, chunking, or vector‑based retrieval to compress large knowledge bases into a few high‑value tokens.
+
+**Structure prompts for efficiency**: a static “system‑instruction + few‑shot examples + user query” template lets you cache the system message and reuse it across calls, eliminating redundant tokens.
+
+Add **dynamic budget checks** before each generation: `remaining = max_budget – tokens_used`. If the remainder drops below a safety margin, truncate context, ask the user for clarification, or fall back to a cheaper model.
+
+Finally, **monitor, log, and iterate**. Record input vs. output token counts, cost, and latency for every request. Analyze the data to spot over‑long histories or unnecessary context, then refine pruning, summarization, and prompt‑reuse strategies. Re‑evaluate budget limits regularly as model pricing or usage patterns change.
+
+CRITIQUE:
+Here are three concrete, action‑oriented ways to tighten the cheat‑sheet and make it more useful for engineers who actually have to implement token‑budgeting in production:
+
+| # | Improvement | Why it helps | How to apply it in the draft |
+|---|-------------|--------------|------------------------------|
+| **1** | **Add a concrete “budget‑calculation” formula and a quick‑reference table** | Readers often skim for a one‑liner they can copy‑paste into code. A clear arithmetic expression (and a small table of typical limits) removes ambiguity about where the “budget” comes from and how to split it between input / output. | Insert a short “Math box” after the opening paragraph, e.g.:<br><br>```python\nMAX_TOKENS   = 8192          # model’s context window\nINPUT_RATIO  = 0.70           # % of budget we reserve for prompt + retrieved docs\nOUTPUT_RATIO = 0.30           # % we keep for the model’s reply\nMAX_INPUT    = int(MAX_TOKENS * INPUT_RATIO)\nMAX_OUTPUT   = int(MAX_TOKENS * OUTPUT_RATIO)\n```<br>Then add a tiny table: <br>• 4 K → 2 800 in / 1 200 out <br>• 8 K → 5 600 in / 2 400 out <br>• 32 K → 22 400 in / 9 600 out. |
+| **2** | **Show a concrete prompt‑template with placeholders and explain which parts are cached** | “Static system‑instruction + few‑shot examples” is vague. A concrete skeleton lets readers see exactly what can be reused and what must be rebuilt each turn, reducing accidental token waste. | Add a code‑style snippet after “Structure prompts for efficiency”:<br><br>```text\n--- System Prompt (cached) -----------------------------------\nYou are a helpful AI assistant that answers questions about the company’s product line.\n\n--- Few‑shot examples (cached)

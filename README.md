@@ -517,3 +517,126 @@ uv run pytest tests/test_resumability.py -v > outputs/test_resumability.txt
 ## Task 4 Result
 
 Task 4 implements resumability using persisted cumulative state. Each successfully validated stage is saved immediately, and previously completed stages are skipped when matching state is loaded. The automated failure test demonstrates that execution can continue from the last successful stage instead of restarting the complete sequential pipeline.
+
+---
+
+## Task 5 — Cost Report
+
+Task 5 extends the sequential pipeline with stage-level measurements for token usage and latency.
+
+Each model call is measured independently so that the resource usage of the outline, draft, and critique stages can be compared.
+
+### Implementation
+
+A shared `call_model()` function handles each model invocation and records its measurements.
+
+Latency is measured using:
+
+```python id="85ul0i"
+start_time = time.perf_counter()
+response = model.invoke(prompt)
+latency = time.perf_counter() - start_time
+```
+
+Token usage is collected from the model response metadata:
+
+```python id="1yk6az"
+usage = response.usage_metadata or {}
+```
+
+For every stage, the following values are recorded:
+
+* Input tokens
+* Output tokens
+* Total tokens
+* Latency
+
+The measurements are stored inside the cumulative state under the `metrics` dictionary.
+
+### Separate Runnables
+
+The three stages remain separate LangChain Runnables:
+
+```python id="kbhc9l"
+outline_chain = RunnableLambda(create_outline)
+draft_chain = RunnableLambda(create_draft)
+critique_chain = RunnableLambda(create_critique)
+```
+
+Each stage performs its own model call and adds both its generated output and measurement data to the cumulative state.
+
+### Cost Report
+
+After all three stages complete, `print_cost_report()` displays the measurements in a table:
+
+```text id="8fd4qx"
+Stage            Input    Output     Total    Latency(s)
+--------------------------------------------------------
+Outline             ...       ...       ...          ...
+Draft               ...       ...       ...          ...
+Critique            ...       ...       ...          ...
+--------------------------------------------------------
+TOTAL               ...       ...       ...          ...
+```
+
+The total row aggregates token usage and latency across the complete sequential pipeline.
+
+The report focuses on the measurements required by the assessment rather than using a hardcoded monetary price for a specific model.
+
+### Testing
+
+Task 5 includes automated success and failure tests.
+
+The success test uses a deterministic fake model-call function with fixed token and latency values. It verifies that:
+
+* All three sequential stages complete.
+* Each stage produces output.
+* Token measurements are stored for each stage.
+* Latency is recorded in the metrics.
+* The cumulative state contains the generated results and measurement information.
+
+The failure test verifies that an empty topic is rejected before the sequential pipeline begins.
+
+Fake measurement data is used in automated tests so they remain deterministic and do not depend on API availability or variable model latency.
+
+### Guardrails
+
+Task 5 continues to use the shared project guardrails:
+
+* Step limit
+* Capped retries
+* Per-call timeout
+* Input token budget
+* Output validation
+* Secret hygiene through environment variables
+
+The shared guardrail evidence demonstrates the implemented step-limit, retry, token-budget, and validation controls.
+
+### Run Task 5
+
+```bash id="6ncv44"
+uv run python -m cost_report.cost_report
+```
+
+### Run Task 5 Tests
+
+```bash id="vfrq1b"
+uv run pytest tests/test_cost_report.py -v
+```
+
+### Save Task 5 Output
+
+```bash id="nv0b06"
+uv run python -m cost_report.cost_report > outputs/cost_report.txt
+```
+
+### Save Test Output
+
+```bash id="ebxf7n"
+uv run pytest tests/test_cost_report.py -v > outputs/test_cost_report.txt
+```
+
+## Task 5 Result
+
+Task 5 adds measurable stage-level reporting to the sequential pipeline. Token usage and latency are captured independently for the outline, draft, and critique stages and presented in a consolidated table, providing numerical evidence of the execution cost of each stage.
+
